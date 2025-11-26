@@ -59,6 +59,11 @@ export class BrowserTools {
                 tags: { type: 'array', items: { type: 'string' }, description: 'Tags' }
               },
               description: 'Instance metadata'
+            },
+            persistent: {
+              type: ['boolean', 'string'],
+              description: 'Use persistent browser context to preserve cookies/localStorage across sessions. true = auto temp directory, string = custom userDataDir path',
+              default: false
             }
           }
         }
@@ -507,7 +512,8 @@ export class BrowserTools {
               headless: args.headless ?? true,
               viewport: args.responsive ? null : (args.viewport || { width: 1280, height: 720 }),
               responsive: args.responsive ?? false,
-              userAgent: args.userAgent
+              userAgent: args.userAgent,
+              persistent: args.persistent ?? false
             },
             args.metadata
           );

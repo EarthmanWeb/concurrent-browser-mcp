@@ -25,6 +25,7 @@ program
   .option('--bypass-csp', 'Bypass CSP', false)
   .option('--proxy <string>', 'Proxy server (e.g., http://127.0.0.1:7890)')
   .option('--no-proxy-auto-detect', 'Disable automatic proxy detection')
+  .option('--persistent [path]', 'Use persistent browser context (true = temp dir, path = custom userDataDir)')
   .action(async (options) => {
     // Build configuration
     const config: ServerConfig = {
@@ -39,6 +40,7 @@ program
           height: options.height,
         },
         userAgent: options.userAgent,
+        persistent: options.persistent,
         contextOptions: {
           ignoreHTTPSErrors: options.ignoreHttpsErrors,
           bypassCSP: options.bypassCsp,
@@ -66,6 +68,15 @@ program
         console.error(chalk.gray('Proxy: Auto-detection enabled'));
       } else {
         console.error(chalk.gray('Proxy: Disabled'));
+      }
+
+      if (config.defaultBrowserConfig.persistent) {
+        const persistPath = typeof config.defaultBrowserConfig.persistent === 'string'
+          ? config.defaultBrowserConfig.persistent
+          : 'auto (temp directory)';
+        console.error(chalk.gray(`Persistent context: ${persistPath}`));
+      } else {
+        console.error(chalk.gray('Persistent context: Disabled (ephemeral/incognito-like)'));
       }
       console.error('');
 
@@ -95,18 +106,24 @@ program
     
     console.log(chalk.yellow('4. Start server without proxy auto-detection:'));
     console.log(chalk.gray('  npx concurrent-browser-mcp --no-proxy-auto-detect\n'));
+
+    console.log(chalk.yellow('5. Start server with persistent browser context:'));
+    console.log(chalk.gray('  npx concurrent-browser-mcp --persistent\n'));
+
+    console.log(chalk.yellow('6. Start server with custom persistent directory:'));
+    console.log(chalk.gray('  npx concurrent-browser-mcp --persistent /path/to/userDataDir\n'));
     
-    console.log(chalk.yellow('5. Use in MCP client:'));
+    console.log(chalk.yellow('7. Use in MCP client:'));
     console.log(chalk.gray('  {'));
     console.log(chalk.gray('    "mcpServers": {'));
     console.log(chalk.gray('      "concurrent-browser": {'));
     console.log(chalk.gray('        "command": "npx",'));
-    console.log(chalk.gray('        "args": ["concurrent-browser-mcp", "--max-instances", "20", "--proxy", "http://127.0.0.1:7890"]'));
+    console.log(chalk.gray('        "args": ["concurrent-browser-mcp", "--max-instances", "20", "--persistent"]'));
     console.log(chalk.gray('      }'));
     console.log(chalk.gray('    }'));
     console.log(chalk.gray('  }\n'));
-    
-    console.log(chalk.yellow('6. Available tools include:'));
+
+    console.log(chalk.yellow('8. Available tools include:'));
     console.log(chalk.gray('  - browser_create_instance: Create browser instance'));
     console.log(chalk.gray('  - browser_list_instances: List all instances'));
     console.log(chalk.gray('  - browser_navigate: Navigate to URL'));
@@ -115,8 +132,8 @@ program
     console.log(chalk.gray('  - browser_screenshot: Take screenshot'));
     console.log(chalk.gray('  - browser_evaluate: Execute JavaScript'));
     console.log(chalk.gray('  - and more...\n'));
-    
-    console.log(chalk.yellow('7. Test real functionality:'));
+
+    console.log(chalk.yellow('9. Test real functionality:'));
     console.log(chalk.gray('  - Simulation demo: node examples/demo.js'));
     console.log(chalk.gray('  - Real test: node test-real-screenshot.js (generates actual screenshot files)'));
     console.log(chalk.gray('  - View screenshots: open screenshot-*.png\n'));

@@ -30,6 +30,7 @@ export interface BrowserConfig {
   responsive?: boolean;
   userAgent?: string;
   proxy?: ProxyConfig;
+  persistent?: boolean | string; // true = auto temp dir, string = custom userDataDir path
   contextOptions?: {
     ignoreHTTPSErrors?: boolean;
     bypassCSP?: boolean;
