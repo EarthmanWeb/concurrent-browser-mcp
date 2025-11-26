@@ -1,7 +1,10 @@
-import { chromium, firefox, webkit, Browser } from 'playwright';
+import { chromium, firefox, webkit, Browser, BrowserContext } from 'playwright';
 import { v4 as uuidv4 } from 'uuid';
 import { BrowserInstance, BrowserConfig, ServerConfig, ToolResult } from './types.js';
 import { execSync } from 'child_process';
+import * as path from 'path';
+import * as os from 'os';
+import * as fs from 'fs';
 
 export class BrowserManager {
   private instances: Map<string, BrowserInstance> = new Map();
@@ -172,27 +175,49 @@ export class BrowserManager {
       }
 
       const config = { ...this.config.defaultBrowserConfig, ...browserConfig };
-      const browser = await this.launchBrowser(config);
-      
-      const contextOptions: any = {
-        viewport: config.viewport,
-        ...config.contextOptions
-      };
-      if (config.userAgent) {
-        contextOptions.userAgent = config.userAgent;
-      }
-      
-      // Add proxy configuration to context
-      const effectiveProxy = this.getEffectiveProxy(browserConfig);
-      if (effectiveProxy) {
-        contextOptions.proxy = { server: effectiveProxy };
-      }
-      
-      const context = await browser.newContext(contextOptions);
-
-      const page = await context.newPage();
-      
       const instanceId = uuidv4();
+
+      // Get effective proxy
+      const effectiveProxy = this.getEffectiveProxy(browserConfig);
+
+      let browser: Browser | null = null;
+      let context: BrowserContext;
+      let userDataDir: string | undefined;
+
+      if (config.persistent) {
+        // Use persistent context - browser is null, only context is returned
+        userDataDir = typeof config.persistent === 'string'
+          ? config.persistent
+          : path.join(os.tmpdir(), `browser-mcp-${instanceId}`);
+
+        // Ensure directory exists
+        if (!fs.existsSync(userDataDir)) {
+          fs.mkdirSync(userDataDir, { recursive: true });
+        }
+
+        context = await this.launchPersistentContext(config, userDataDir, effectiveProxy);
+      } else {
+        // Use ephemeral context (original behavior)
+        browser = await this.launchBrowser(config);
+
+        const contextOptions: any = {
+          viewport: config.viewport,
+          ...config.contextOptions
+        };
+        if (config.userAgent) {
+          contextOptions.userAgent = config.userAgent;
+        }
+
+        // Add proxy configuration to context
+        if (effectiveProxy) {
+          contextOptions.proxy = { server: effectiveProxy };
+        }
+
+        context = await browser.newContext(contextOptions);
+      }
+
+      const page = context.pages()[0] || await context.newPage();
+
       const instance: BrowserInstance = {
         id: instanceId,
         browser,
@@ -215,6 +240,7 @@ export class BrowserManager {
           viewport: config.viewport,
           responsive: config.viewport === null,
           proxy: effectiveProxy,
+          persistent: userDataDir || false,
           metadata
         },
         instanceId
@@ -224,6 +250,44 @@ export class BrowserManager {
         success: false,
         error: `Failed to create browser instance: ${error instanceof Error ? error.message : error}`
       };
+    }
+  }
+
+  /**
+   * Launch persistent browser context
+   */
+  private async launchPersistentContext(
+    config: BrowserConfig,
+    userDataDir: string,
+    effectiveProxy?: string
+  ): Promise<BrowserContext> {
+    const launchOptions: any = {
+      headless: config.headless ?? true,
+      viewport: config.viewport,
+      ...config.contextOptions
+    };
+
+    if (config.userAgent) {
+      launchOptions.userAgent = config.userAgent;
+    }
+
+    if (effectiveProxy) {
+      launchOptions.proxy = { server: effectiveProxy };
+    }
+
+    if (config.headless) {
+      launchOptions.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+    }
+
+    switch (config.browserType) {
+      case 'chromium':
+        return await chromium.launchPersistentContext(userDataDir, launchOptions);
+      case 'firefox':
+        return await firefox.launchPersistentContext(userDataDir, launchOptions);
+      case 'webkit':
+        return await webkit.launchPersistentContext(userDataDir, launchOptions);
+      default:
+        throw new Error(`Unsupported browser type: ${config.browserType}`);
     }
   }
 
@@ -274,7 +338,12 @@ export class BrowserManager {
         };
       }
 
-      await instance.browser.close();
+      // For persistent contexts, browser is null - close context instead
+      if (instance.browser) {
+        await instance.browser.close();
+      } else {
+        await instance.context.close();
+      }
       this.instances.delete(instanceId);
 
       return {
@@ -296,9 +365,9 @@ export class BrowserManager {
   async closeAllInstances(): Promise<ToolResult> {
     try {
       const closePromises = Array.from(this.instances.values()).map(
-        instance => instance.browser.close()
+        instance => instance.browser ? instance.browser.close() : instance.context.close()
       );
-      
+
       await Promise.all(closePromises);
       const closedCount = this.instances.size;
       this.instances.clear();
