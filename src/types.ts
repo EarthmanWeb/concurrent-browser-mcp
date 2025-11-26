@@ -20,6 +20,9 @@ export interface ProxyConfig {
   autoDetect?: boolean; // Whether to auto-detect local proxy, defaults to true
 }
 
+/** Supported Chrome/Edge channels for using installed browsers */
+export type BrowserChannel = 'chrome' | 'chrome-beta' | 'chrome-dev' | 'chrome-canary' | 'msedge' | 'msedge-beta' | 'msedge-dev' | 'msedge-canary';
+
 export interface BrowserConfig {
   browserType: 'chromium' | 'firefox' | 'webkit';
   headless?: boolean;
@@ -29,6 +32,10 @@ export interface BrowserConfig {
   };
   userAgent?: string;
   proxy?: ProxyConfig;
+  /** Use installed browser instead of bundled Playwright browser */
+  channel?: BrowserChannel;
+  /** Additional browser launch arguments */
+  args?: string[];
   contextOptions?: {
     ignoreHTTPSErrors?: boolean;
     bypassCSP?: boolean;
