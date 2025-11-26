@@ -51,6 +51,16 @@ export class BrowserTools {
               type: 'string',
               description: 'User agent string'
             },
+            channel: {
+              type: 'string',
+              enum: ['chrome', 'chrome-beta', 'chrome-dev', 'chrome-canary', 'msedge', 'msedge-beta', 'msedge-dev', 'msedge-canary'],
+              description: 'Use installed browser instead of bundled Playwright browser. Enables features like password manager.'
+            },
+            args: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Additional browser launch arguments (e.g., ["--disable-extensions"])'
+            },
             persistent: {
               type: ['boolean', 'string'],
               description: 'Use persistent browser context to preserve cookies/localStorage across sessions. true = auto temp directory, string = custom userDataDir path',
@@ -513,6 +523,8 @@ export class BrowserTools {
               viewport: args.responsive ? null : (args.viewport || { width: 1280, height: 720 }),
               responsive: args.responsive ?? false,
               userAgent: args.userAgent,
+              channel: args.channel,
+              args: args.args,
               persistent: args.persistent ?? false
             },
             args.metadata

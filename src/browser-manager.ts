@@ -240,6 +240,7 @@ export class BrowserManager {
           viewport: config.viewport,
           responsive: config.viewport === null,
           proxy: effectiveProxy,
+          channel: config.channel,
           persistent: userDataDir || false,
           metadata
         },
@@ -267,6 +268,11 @@ export class BrowserManager {
       ...config.contextOptions
     };
 
+    // Use installed browser via channel (enables password manager, etc.)
+    if (config.channel) {
+      launchOptions.channel = config.channel;
+    }
+
     if (config.userAgent) {
       launchOptions.userAgent = config.userAgent;
     }
@@ -275,8 +281,20 @@ export class BrowserManager {
       launchOptions.proxy = { server: effectiveProxy };
     }
 
+    // Build args array
+    const args: string[] = [];
+
     if (config.headless) {
-      launchOptions.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+      args.push('--no-sandbox', '--disable-setuid-sandbox');
+    }
+
+    // Add custom args
+    if (config.args?.length) {
+      args.push(...config.args);
+    }
+
+    if (args.length > 0) {
+      launchOptions.args = args;
     }
 
     switch (config.browserType) {
@@ -391,18 +409,32 @@ export class BrowserManager {
     const launchOptions: any = {
       headless: config.headless ?? true
     };
-    
+
+    // Use installed browser via channel (enables password manager, etc.)
+    if (config.channel) {
+      launchOptions.channel = config.channel;
+    }
+
+    // Build args array
+    const args: string[] = [];
+
     if (config.headless) {
-      launchOptions.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+      args.push('--no-sandbox', '--disable-setuid-sandbox');
     }
 
     // Add proxy arguments for Chromium
     const effectiveProxy = this.getEffectiveProxy(config);
     if (effectiveProxy && config.browserType === 'chromium') {
-      if (!launchOptions.args) {
-        launchOptions.args = [];
-      }
-      launchOptions.args.push(`--proxy-server=${effectiveProxy}`);
+      args.push(`--proxy-server=${effectiveProxy}`);
+    }
+
+    // Add custom args
+    if (config.args?.length) {
+      args.push(...config.args);
+    }
+
+    if (args.length > 0) {
+      launchOptions.args = args;
     }
 
     switch (config.browserType) {
