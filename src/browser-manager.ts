@@ -273,6 +273,11 @@ export class BrowserManager {
       launchOptions.channel = config.channel;
     }
 
+    // Ignore default args (e.g., to remove --enable-automation)
+    if (config.ignoreDefaultArgs?.length) {
+      launchOptions.ignoreDefaultArgs = config.ignoreDefaultArgs;
+    }
+
     if (config.userAgent) {
       launchOptions.userAgent = config.userAgent;
     }
@@ -413,6 +418,11 @@ export class BrowserManager {
     // Use installed browser via channel (enables password manager, etc.)
     if (config.channel) {
       launchOptions.channel = config.channel;
+    }
+
+    // Ignore default args (e.g., to remove --enable-automation)
+    if (config.ignoreDefaultArgs?.length) {
+      launchOptions.ignoreDefaultArgs = config.ignoreDefaultArgs;
     }
 
     // Build args array

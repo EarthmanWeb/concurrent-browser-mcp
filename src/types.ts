@@ -37,6 +37,8 @@ export interface BrowserConfig {
   channel?: BrowserChannel;
   /** Additional browser launch arguments */
   args?: string[];
+  /** Array of Playwright default args to ignore (e.g., ['--enable-automation']) */
+  ignoreDefaultArgs?: string[];
   /** Persistent context: true = auto temp dir, string = custom userDataDir path */
   persistent?: boolean | string;
   contextOptions?: {
