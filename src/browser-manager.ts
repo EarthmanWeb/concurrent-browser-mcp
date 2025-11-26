@@ -328,6 +328,11 @@ export class BrowserManager {
       launchOptions.channel = config.channel;
     }
 
+    // Ignore default args (e.g., to remove --enable-automation)
+    if (config.ignoreDefaultArgs?.length) {
+      launchOptions.ignoreDefaultArgs = config.ignoreDefaultArgs;
+    }
+
     // Build args array
     const args: string[] = [];
 

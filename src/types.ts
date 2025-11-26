@@ -36,6 +36,8 @@ export interface BrowserConfig {
   channel?: BrowserChannel;
   /** Additional browser launch arguments */
   args?: string[];
+  /** Array of Playwright default args to ignore (e.g., ['--enable-automation']) */
+  ignoreDefaultArgs?: string[];
   contextOptions?: {
     ignoreHTTPSErrors?: boolean;
     bypassCSP?: boolean;
