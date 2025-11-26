@@ -56,6 +56,11 @@ export class BrowserTools {
               items: { type: 'string' },
               description: 'Additional browser launch arguments (e.g., ["--disable-extensions"])'
             },
+            ignoreDefaultArgs: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of Playwright default args to ignore (e.g., ["--enable-automation"])'
+            },
             metadata: {
               type: 'object',
               properties: {
@@ -513,7 +518,8 @@ export class BrowserTools {
               viewport: args.viewport || { width: 1280, height: 720 },
               userAgent: args.userAgent,
               channel: args.channel,
-              args: args.args
+              args: args.args,
+              ignoreDefaultArgs: args.ignoreDefaultArgs
             },
             args.metadata
           );
