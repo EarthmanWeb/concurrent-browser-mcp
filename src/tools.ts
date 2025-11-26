@@ -46,6 +46,11 @@ export class BrowserTools {
               type: 'string',
               description: 'User agent string'
             },
+            persistent: {
+              type: ['boolean', 'string'],
+              description: 'Use persistent browser context to preserve cookies/localStorage across sessions. true = auto temp directory, string = custom userDataDir path',
+              default: false
+            },
             metadata: {
               type: 'object',
               properties: {
@@ -501,7 +506,8 @@ export class BrowserTools {
               browserType: args.browserType || 'chromium',
               headless: args.headless ?? true,
               viewport: args.viewport || { width: 1280, height: 720 },
-              userAgent: args.userAgent
+              userAgent: args.userAgent,
+              persistent: args.persistent ?? false
             },
             args.metadata
           );

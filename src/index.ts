@@ -25,6 +25,7 @@ program
   .option('--bypass-csp', 'Bypass CSP', false)
   .option('--proxy <string>', 'Proxy server (e.g., http://127.0.0.1:7890)')
   .option('--no-proxy-auto-detect', 'Disable automatic proxy detection')
+  .option('--persistent [path]', 'Use persistent browser context (true = temp dir, path = custom userDataDir)')
   .action(async (options) => {
     // Build configuration
     const config: ServerConfig = {
