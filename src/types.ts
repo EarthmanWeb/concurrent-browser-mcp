@@ -26,7 +26,8 @@ export interface BrowserConfig {
   viewport?: {
     width: number;
     height: number;
-  };
+  } | null;
+  responsive?: boolean;
   userAgent?: string;
   proxy?: ProxyConfig;
   contextOptions?: {

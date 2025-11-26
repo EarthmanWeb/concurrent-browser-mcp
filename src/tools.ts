@@ -40,7 +40,12 @@ export class BrowserTools {
                 width: { type: 'number', default: 1280 },
                 height: { type: 'number', default: 720 }
               },
-              description: 'Viewport size'
+              description: 'Viewport size (ignored if responsive is true)'
+            },
+            responsive: {
+              type: 'boolean',
+              description: 'Enable responsive mode with no fixed viewport (passes null to Playwright)',
+              default: false
             },
             userAgent: {
               type: 'string',
@@ -500,7 +505,8 @@ export class BrowserTools {
             {
               browserType: args.browserType || 'chromium',
               headless: args.headless ?? true,
-              viewport: args.viewport || { width: 1280, height: 720 },
+              viewport: args.responsive ? null : (args.viewport || { width: 1280, height: 720 }),
+              responsive: args.responsive ?? false,
               userAgent: args.userAgent
             },
             args.metadata

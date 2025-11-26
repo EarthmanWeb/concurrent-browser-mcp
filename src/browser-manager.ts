@@ -213,6 +213,7 @@ export class BrowserManager {
           browserType: config.browserType,
           headless: config.headless,
           viewport: config.viewport,
+          responsive: config.viewport === null,
           proxy: effectiveProxy,
           metadata
         },
