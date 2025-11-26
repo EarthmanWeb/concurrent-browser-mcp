@@ -61,6 +61,11 @@ export class BrowserTools {
               items: { type: 'string' },
               description: 'Additional browser launch arguments (e.g., ["--disable-extensions"])'
             },
+            ignoreDefaultArgs: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of Playwright default args to ignore (e.g., ["--enable-automation"])'
+            },
             persistent: {
               type: ['boolean', 'string'],
               description: 'Use persistent browser context to preserve cookies/localStorage across sessions. true = auto temp directory, string = custom userDataDir path',
@@ -525,6 +530,7 @@ export class BrowserTools {
               userAgent: args.userAgent,
               channel: args.channel,
               args: args.args,
+              ignoreDefaultArgs: args.ignoreDefaultArgs,
               persistent: args.persistent ?? false
             },
             args.metadata
